@@ -1,0 +1,37 @@
+# === CMake build artifacts ===
+/build/
+/CMakeFiles/
+/CMakeCache.txt
+/cmake_install.cmake
+/Makefile
+
+# === Compiled binary and object files ===
+*.o
+*.obj
+*.so
+*.dll
+*.exe
+*.out
+
+# === Logs and temporary files ===
+*.log
+*.tmp
+*.bak
+*.swp
+
+# === Editor & OS generated files ===
+.DS_Store
+Thumbs.db
+
+# === Mini-Git runtime data ===
+.minigit/
+
+# === Test outputs ===
+/test/*.out
+/test/*.log
+
+# === Visual Studio Code ===
+.vscode/
+
+# === CLion / JetBrains IDEs ===
+.idea/
