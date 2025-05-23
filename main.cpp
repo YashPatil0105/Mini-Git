@@ -1,7 +1,12 @@
 #include "commands/InitCommand.hpp"
+#include "commands/AddCommand.hpp"
 
 int main() {
-    InitCommand cmd;
-    cmd.execute();
+    InitCommand init;
+    init.execute();
+
+    AddCommand add("example.txt");
+    add.execute();
+
     return 0;
 }

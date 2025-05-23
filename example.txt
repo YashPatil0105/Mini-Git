@@ -1,0 +1,16 @@
+Test Instructions:
+Create example.txt with some content.
+
+Build and run the program.
+
+Check .minigit/objects/ — it should have a file named by hash.
+
+You should see:
+Test Instructions:
+Create example.txt with some content.
+
+Build and run the program.
+
+Check .minigit/objects/ — it should have a file named by hash.
+
+You should see:
