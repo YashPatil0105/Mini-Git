@@ -10,7 +10,7 @@ namespace fs = std::filesystem;
 
 static StagingArea staging; 
 
-AddCommand::AddCommand(const string& file) : filename(file) {}
+AddCommand::AddCommand(const string& file, StagingArea& staging) : filename(file), staging(staging) {}
 
 void AddCommand::execute(){
     if(!fs::exists(filename)){

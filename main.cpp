@@ -1,12 +1,44 @@
-#include "commands/InitCommand.hpp"
+#include <iostream>
+#include <string>
 #include "commands/AddCommand.hpp"
+#include "commands/CommitCommand.hpp"
+#include "commands/InitCommand.hpp"
+#include "repository/StagingArea.hpp"
 
-int main() {
-    InitCommand init;
-    init.execute();
+using namespace std;
 
-    AddCommand add("example.txt");
-    add.execute();
+int main(int argc, char* argv[]) {
+    if (argc < 2) {
+        cout << "Usage: mini-git <command> [args]\n";
+        return 1;
+    }
+
+    StagingArea staging;
+
+    string command = argv[1];
+    if (command == "init") {
+        InitCommand init;
+        init.execute();
+    }
+    else if (command == "add") {
+        if (argc < 3) {
+            cout << "Please specify a file to add.\n";
+            return 1;
+        }
+        AddCommand add(argv[2], staging);
+        add.execute();
+    }
+    else if (command == "commit") {
+        if (argc < 3) {
+            cout << "Please provide a commit message.\n";
+            return 1;
+        }
+        CommitCommand commit(argv[2]);
+        commit.execute();
+    }
+    else {
+        cout << "Unknown command: " << command << "\n";
+    }
 
     return 0;
 }
