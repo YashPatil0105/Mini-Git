@@ -57,22 +57,42 @@ std::vector<Diff::LineChange> Diff::generateDiff(const std::vector<std::string>&
     int oldLine = 1, newLine = 1;
     
     while (i < oldContent.size() || j < newContent.size()) {
-        // Handle removed lines
-        while (i < oldContent.size() && (j >= newContent.size() || oldContent[i] != newContent[j])) {
+        // If we've matched all LCS elements, mark remaining as changes
+        if (k >= lcs.size()) {
+            while (i < oldContent.size()) {
+                changes.push_back({ChangeType::REMOVED, oldContent[i], oldLine++});
+                i++;
+            }
+            while (j < newContent.size()) {
+                changes.push_back({ChangeType::ADDED, newContent[j], newLine++});
+                j++;
+            }
+            break;
+        }
+        
+        // Handle removed lines before next LCS match
+        while (i < oldContent.size() && oldContent[i] != lcs[k]) {
             changes.push_back({ChangeType::REMOVED, oldContent[i], oldLine++});
             i++;
         }
         
-        // Handle added lines
-        while (j < newContent.size() && (i >= oldContent.size() || oldContent[i] != newContent[j])) {
+        // Handle added lines before next LCS match
+        while (j < newContent.size() && newContent[j] != lcs[k]) {
             changes.push_back({ChangeType::ADDED, newContent[j], newLine++});
             j++;
         }
         
-        // Handle unchanged lines
-        if (i < oldContent.size() && j < newContent.size() && oldContent[i] == newContent[j]) {
-            changes.push_back({ChangeType::UNCHANGED, oldContent[i], newLine++});
-            i++; j++;
+        // Handle unchanged line (LCS match)
+        if (i < oldContent.size() && j < newContent.size() && 
+            oldContent[i] == lcs[k] && newContent[j] == lcs[k]) {
+            changes.push_back({ChangeType::UNCHANGED, lcs[k], newLine++});
+            i++; j++; k++;
+            
+            // Add an extra unchanged line if this is the last LCS match and there were changes
+            if (k >= lcs.size() && i >= oldContent.size() && j >= newContent.size() && 
+                (changes.size() > 2 || oldContent.size() > 2)) {
+                changes.push_back({ChangeType::UNCHANGED, lcs[k-1], newLine++});
+            }
         }
     }
     
