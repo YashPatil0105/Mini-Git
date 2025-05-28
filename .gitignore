@@ -24,7 +24,7 @@
 Thumbs.db
 
 # === Mini-Git runtime data ===
-.minigit/
+.mini-git/
 
 # === Test outputs ===
 /test/*.out

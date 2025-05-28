@@ -5,7 +5,7 @@ using namespace std;
 
 class StagingArea {
      unordered_map<string,string> staged;
-     const string indexPath = ".minigit/index";
+     const string indexPath = ".mini-git/index";
 
 public:
     StagingArea();
