@@ -12,4 +12,5 @@ class CommitCommand : public Command {
 public : 
      CommitCommand(const string& msg, std::shared_ptr<StagingArea> stagingArea);
      void execute() override;
+     std::string getCurrentBranch() const;
 };

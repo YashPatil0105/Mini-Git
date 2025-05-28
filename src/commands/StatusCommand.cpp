@@ -100,8 +100,20 @@ void StatusCommand::execute() {
     std::string latestHash;
     if (fs::exists(headPath)) {
         std::ifstream headFile(headPath);
-        std::getline(headFile, latestHash);
+        std::string refLine;
+        std::getline(headFile, refLine);
         headFile.close();
+        if (refLine.substr(0, 5) == "ref: ") {
+            std::string branchRef = ".mini-git/" + refLine.substr(5); // e.g. refs/heads/master
+            if (fs::exists(branchRef)) {
+                std::ifstream branchFile(branchRef);
+                std::getline(branchFile, latestHash);
+                branchFile.close();
+            }
+        } else {
+            // fallback: HEAD directly contains a hash (detached HEAD)
+            latestHash = refLine;
+        }
     }
     if (!latestHash.empty()) {
         // Try to load the commit and print its root tree hash

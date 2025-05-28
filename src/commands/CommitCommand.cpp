@@ -1,45 +1,3 @@
-// #include "commands/CommitCommand.hpp"
-// #include "core/Commit.hpp"
-// #include "repository/StagingArea.hpp"
-// #include <filesystem>
-// #include <fstream>
-// #include <iostream>
-
-// namespace fs = std::filesystem;
-
-// CommitCommand::CommitCommand(const string& msg) : message(msg) {}
-
-// void CommitCommand::execute(){
-//     StagingArea stage;
-//     auto staged = stage.getStagedFiles();
-
-//     if(staged.empty()){
-//         cout << "No changes staged for commit. \n";
-//         return;
-//     }
-
-//     string parentHash = "";
-//     ifstream head(".minigit/HEAD");
-//     string ref;
-//     getline(head, ref);
-//     head.close();
-
-//     string headRef = ".minigit/" + ref.substr(5); // skip "ref: "
-//     ifstream headFile(headRef);
-//     if (headFile) getline(headFile, parentHash);
-
-//     Commit commit(parentHash, message, staged);
-//     commit.save();
-
-
-//     ofstream out(headRef);
-//     out << commit.getHash() << "\n";
-
-//     stage.clear();
-
-//     cout << "Commited as " << commit.getHash() << "\n";
-// }
-
 #include "commands/CommitCommand.hpp"
 #include "core/Commit.hpp"
 #include "repository/StagingArea.hpp"
@@ -47,11 +5,23 @@
 #include <fstream>
 #include <iostream>
 #include "core/Tree.hpp"
+#include "core/Branch.hpp"
 
 namespace fs = std::filesystem;
 
-CommitCommand::CommitCommand(const string& msg, std::shared_ptr<StagingArea> stagingArea)
-    : message(msg), staging(stagingArea) {}
+CommitCommand::CommitCommand(const string& msg, shared_ptr<StagingArea> staging)
+    : message(msg), staging(staging) {}
+
+string CommitCommand::getCurrentBranch() const {
+    std::ifstream head(".mini-git/HEAD");
+    if (!head) return "";
+    
+    string ref;
+    std::getline(head, ref);
+    if (ref.substr(0, 5) != "ref: ") return "";
+    
+    return ref.substr(5).substr(11); // Remove "ref: refs/heads/"
+}
 
 void CommitCommand::execute() {
     auto staged = staging->getStagedFiles();
@@ -86,23 +56,40 @@ void CommitCommand::execute() {
         headFile.close();
     }
 
-    // Build the root tree from the working directory
-    Tree rootTree = Tree::buildFromDirectory(".");
+    // Build tree from staged files
+    Tree rootTree;
+    for (const auto& [file, hash] : staged) {
+        rootTree.addEntry(EntryType::BLOB, file, hash);
+    }
     rootTree.save();
     string rootTreeHash = rootTree.getHash();
 
+    // Create and save commit
     Commit commit(parentHash, message, rootTreeHash);
     commit.save();
 
-    ofstream out(headRefPath);
-    if (!out) {
-        cerr << "Error: Unable to write to HEAD ref path.\n";
+    // Update current branch
+    string currentBranch = getCurrentBranch();
+    if (!currentBranch.empty()) {
+        try {
+            Branch branch = Branch::load(currentBranch);
+            branch.setCommitHash(commit.getHash());
+            branch.save();
+        } catch (const std::exception& e) {
+            cerr << "Error updating branch: " << e.what() << endl;
+            return;
+        }
+    }
+
+    // Update HEAD
+    ofstream headOut(refPath);
+    if (!headOut) {
+        cerr << "Error: Failed to update HEAD reference.\n";
         return;
     }
-    out << commit.getHash() << "\n";
-    out.close();
+    headOut << "ref: refs/heads/" << currentBranch;
+    headOut.close();
 
+    cout << "Committed: " << commit.getHash() << endl;
     staging->clear();
-
-    cout << "Committed as " << commit.getHash() << "\n";
 }

@@ -3,6 +3,8 @@
 #include "commands/CommitCommand.hpp"
 #include "commands/AddCommand.hpp"
 #include "commands/InitCommand.hpp"
+#include "commands/BranchCommand.hpp"
+#include "commands/DiffCommand.hpp"
 // #include "commands/LogCommand.hpp"
 #include <iostream>
 #include <memory>
@@ -38,6 +40,21 @@ unique_ptr<Command> CliParser::parse(int argc, char* argv[], shared_ptr<StagingA
         }
         string filename = argv[2];
         return make_unique<AddCommand>(filename, staging);
+    }
+    else if (command == "branch") {
+        if (argc < 3) {
+            return nullptr;
+        }
+        string branchName = argv[2];
+        bool create = (argc > 3 && string(argv[3]) == "-c");
+        return make_unique<BranchCommand>(branchName, create);
+    }
+    else if (command == "diff") {
+        if (argc < 3) {
+            return nullptr;
+        }
+        string filename = argv[2];
+        return make_unique<DiffCommand>(filename);
     }
 
     // else if (command == "log") {

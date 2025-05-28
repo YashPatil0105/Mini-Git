@@ -1,6 +1,7 @@
 #pragma once 
 #include <string>
 #include <vector>
+#include <filesystem>
 
 using namespace std;
 
@@ -27,6 +28,7 @@ public:
     void save(); //saves to .mini-git/tree/
     const string& getHash(); // computes hash if needed
     const vector<TreeEntry>& getEntries() const;
-
-    static Tree buildFromDirectory(const std::string& path);
+    string findBlobHash(const string& filePath) const;
+    static Tree load(const string& hash);
+    static Tree buildFromDirectory(const string& path);
 };

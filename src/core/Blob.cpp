@@ -36,6 +36,18 @@ void Blob::save() const {
     }
     out << content;
     out.close();
+}
 
-    cout << "Saved blob: " << blobPath << endl;
+Blob Blob::load(const std::string& hash) {
+    std::string blobPath = ".mini-git/objects/" + hash;
+    std::ifstream in(blobPath, std::ios::binary);
+    if (!in) {
+        throw std::runtime_error("Blob not found: " + hash);
+    }
+
+    Blob blob;
+    blob.content = std::string((std::istreambuf_iterator<char>(in)),
+                              std::istreambuf_iterator<char>());
+    blob.hash = hash;
+    return blob;
 }
